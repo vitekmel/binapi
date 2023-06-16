@@ -14,15 +14,15 @@ include_directories(
     ./include
 )
 
-set(BOOST_ROOT /usr/local/Cellar/boost/1.82.0)
 find_package(Boost REQUIRED COMPONENTS system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
-set(OPENSSL_ROOT_DIR /usr/local/opt/openssl@3)
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
-link_directories(${OPENSSL_LIBRARIES})
+
+get_filename_component(OPENSSL_LIB_DIR "${OPENSSL_CRYPTO_LIBRARY}" DIRECTORY)
+link_directories(${OPENSSL_LIB_DIR})
 
 set(BINAPI_HEADERS
     binapi/api.hpp
