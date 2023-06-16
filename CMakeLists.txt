@@ -18,8 +18,25 @@ find_package(Boost REQUIRED COMPONENTS system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
-find_package(OpenSSL REQUIRED)
+#find_package(OpenSSL REQUIRED)
+
+find_package(OpenSSL QUIET)
+if(NOT OpenSSL_FOUND)
+    message(STATUS "Looking for OpenSSL in common locations")
+    find_path(OPENSSL_ROOT_DIR
+            NAMES include/openssl/ssl.h
+            PATHS "/usr/local/opt/openssl" "/opt/homebrew/opt/openssl@3"
+            )
+    if(OPENSSL_ROOT_DIR)
+        message(STATUS "Found OpenSSL in ${OPENSSL_ROOT_DIR}")
+        find_package(OpenSSL REQUIRED)
+    else()
+        message(FATAL_ERROR "OpenSSL not found")
+    endif()
+endif()
+
 include_directories(${OPENSSL_INCLUDE_DIR})
+message(${OPENSSL_FOUND})
 
 get_filename_component(OPENSSL_LIB_DIR "${OPENSSL_CRYPTO_LIBRARY}" DIRECTORY)
 link_directories(${OPENSSL_LIB_DIR})
