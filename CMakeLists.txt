@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(binapi)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fsanitize=address")
 
@@ -14,11 +14,15 @@ include_directories(
     ./include
 )
 
-if (DEFINED ${BOOST_INCLUDE_DIR})
-    include_directories(
-        ${BOOST_INCLUDE_DIR}
-    )
-endif()
+set(BOOST_ROOT /usr/local/Cellar/boost/1.82.0)
+find_package(Boost REQUIRED COMPONENTS system filesystem)
+include_directories(${Boost_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
+
+set(OPENSSL_ROOT_DIR /usr/local/opt/openssl@3)
+find_package(OpenSSL REQUIRED)
+include_directories(${OPENSSL_INCLUDE_DIR})
+link_directories(${OPENSSL_LIBRARIES})
 
 set(BINAPI_HEADERS
     binapi/api.hpp
@@ -47,25 +51,8 @@ set(BINAPI_SOURCES
     src/websocket.cpp
 )
 
-add_executable(
-    ${PROJECT_NAME}
-    #
-    main.cpp
-    #
-    ${BINAPI_SOURCES}
-)
+add_executable(${PROJECT_NAME} main.cpp ${BINAPI_SOURCES})
 
-if (DEFINED ${BOOST_LIB_DIR})
-    target_link_libraries(
-        ${PROJECT_NAME}
-        -L${BOOST_LIB_DIR}
-    )
-endif()
-
-target_link_libraries(
-    ${PROJECT_NAME}
-    z
-    crypto
-    ssl
-    pthread
-)
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(${PROJECT_NAME} z crypto ssl pthread)
